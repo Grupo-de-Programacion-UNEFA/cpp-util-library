@@ -21,7 +21,6 @@
 #include <cmath>
 #include <cctype>
 #include <stdlib.h>
-#include <random>
 
 char OS = 'w';
 // ==============================
@@ -36,7 +35,6 @@ namespace util {
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
-   std::string inputRandom ();
    void borrarPantalla ();
 } // namespace util
 
@@ -169,16 +167,6 @@ namespace util {
             continue;
          }
       }
-   }
-   // Genera un codigo numerico aleatorio y lo devuelve en forma de cadena
-   std::string inputRandom () {
-      std::string Coordenadas;
-      std::random_device nun;
-      std::mt19937 generator(nun());
-      std::uniform_int_distribution<>dist(10000000,99999999);
-      Coordenadas = std::to_string(dist(generator));
-   
-      return Coordenadas;
    }
    // Declara y define la funcion borrarPantalla, sin argumentos ni retorno (void)
    void borrarPantalla () {
