@@ -23,24 +23,39 @@
 #include <cctype>
 #include <stdlib.h>
 #include <climits>
-
-char OS = 'w';
 // ==============================
 //  DECLARACION DE LAS FUNCIONES
 // ==============================
+
 namespace util {
+   class Config {
+      private:
+         bool _win;
+         bool _pause;
+         bool _clear;
+      public:
+         Config (bool isWin = false, bool willPause = false, bool willClear = false) {
+            _win = isWin;
+            _pause = willPause;
+            _clear = willClear;
+         }
+         bool win () {return _win;};
+         bool pause () {return _pause;};
+         bool clear () {return _clear;};
+   };
+   Config CONF;
    // Templates & Overloaded Functions
    template <typename numType> numType inputNumber (std::string textoARepetir, numType max = INT_MAX, numType min = INT_MIN);
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
-   bool config();
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
    std::string multiplyStr (std::string str, int times);
    void borrarPantalla ();
    void pause ();
+   void setConfig(bool isWin = false, bool willPause = false, bool willClear = false);
 } // namespace util
 
 // En caso de trabajar con archivo de cabecero, descomentar la siguiente linea y modificar la ruta
@@ -183,11 +198,20 @@ namespace util {
    }
    // Encapsula una funcion para limpiar la pantalla del programa para multiplataforma
    void borrarPantalla () {
-      system(((OS == 'w') ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
+      if (!CONF.clear()) return;
+      system(((CONF.win()) ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
       // std::cout << "\033[2J\033[1;1H"; // LIMPIA LA CONSOLA EN UNIX/LINUX
    }
    // Encapsula la funcion para pausar el programa para multiplataforma
    void pause () {
-      system("pause");
+      if (!CONF.pause()) return;
+      if (CONF.win()) {system("pause"); return;}
+      std::cout << "Presione una tecla para continuar . . . ";
+      std::cin.ignore();
+      std::cin.get();
+   }
+   void setConfig (bool isWin, bool willPause, bool willClear) {
+      Config newConf(isWin, willPause, willClear);
+      CONF = newConf;
    }
 } // namespace util
