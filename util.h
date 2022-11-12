@@ -1,7 +1,7 @@
 /*
-   -------------------------------------
-   Definicion de funciones de Utilidades
-   -------------------------------------
+   ----------------------------
+   cpp-util-library - util-0.3
+   ----------------------------
 */
 // I N F O R M A C I O N
 // ======================
@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cctype>
 #include <stdlib.h>
+#include <climits>
 
 char OS = 'w';
 // ==============================
@@ -28,14 +29,16 @@ char OS = 'w';
 // ==============================
 namespace util {
    // Templates & Overloaded Functions
-   template <typename numType> numType inputNumber (std::string textoARepetir, numType max = LONG_MAX, numType min = LONG_MIN);
+   template <typename numType> numType inputNumber (std::string textoARepetir, numType max = INT_MAX, numType min = INT_MIN);
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
+   std::string multiplyStr (std::string str, int times);
    void borrarPantalla ();
+   void pause ();
 } // namespace util
 
 // En caso de trabajar con archivo de cabecero, descomentar la siguiente linea y modificar la ruta
@@ -168,9 +171,20 @@ namespace util {
          }
       }
    }
+
+   std::string multiplyStr (std::string str, int times) {
+      std::string textoMultiplicado = "";
+      for (int i = 0; i < times; i++) {
+         textoMultiplicado += str;
+      }
+      return textoMultiplicado;
+   }
    // Declara y define la funcion borrarPantalla, sin argumentos ni retorno (void)
    void borrarPantalla () {
       system(((OS == 'w') ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
       // std::cout << "\033[2J\033[1;1H"; // LIMPIA LA CONSOLA EN UNIX/LINUX
+   }
+   void pause () {
+      system("pause");
    }
 } // namespace util
