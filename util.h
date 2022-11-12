@@ -137,7 +137,7 @@ namespace util {
          borrarPantalla();
          if (claveIngresada == clave) {
             std::cout << "Clave Ingresada Correcta. Puede Continuar.\n";
-            system("pause");
+            pause();
             return true; // Retorna verdadero, que la clave ingresada fue valida
          } else { // Si no coincidio, avisa que se equivoco
             std::cout << "Clave Ingresada Incorrecta. ";
@@ -147,7 +147,7 @@ namespace util {
          }
       }
       std::cout << "Operacion Cancelada.\n";
-      system("pause");
+      pause();
       return false;  // Retorna falso, ya que las claves ingresadas no fueron validas
    }
    // Habilita una entrada de usuario validada para que ingrese una cadena de texto validada,
