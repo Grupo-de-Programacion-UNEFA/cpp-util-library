@@ -1,7 +1,7 @@
 /*
-   -------------------------------------
-   Definicion de funciones de Utilidades
-   -------------------------------------
+   ----------------------------
+   cpp-util-library - util-0.3
+   ----------------------------
 */
 // I N F O R M A C I O N
 // ======================
@@ -17,25 +17,45 @@
 #pragma once // directiva que indica que se compile una sola vez
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cmath>
 #include <cctype>
 #include <stdlib.h>
-
-char OS = 'w';
+#include <climits>
 // ==============================
 //  DECLARACION DE LAS FUNCIONES
 // ==============================
+
 namespace util {
+   class Config {
+      private:
+         bool _win;
+         bool _pause;
+         bool _clear;
+      public:
+         Config (bool isWin = false, bool willPause = false, bool willClear = false) {
+            _win = isWin;
+            _pause = willPause;
+            _clear = willClear;
+         }
+         bool win () {return _win;};
+         bool pause () {return _pause;};
+         bool clear () {return _clear;};
+   };
+   Config CONF;
    // Templates & Overloaded Functions
-   template <typename numType> numType inputNumber (std::string textoARepetir, numType max = LONG_MAX, numType min = LONG_MIN);
+   template <typename numType> numType inputNumber (std::string textoARepetir, numType max = INT_MAX, numType min = INT_MIN);
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
+   std::string multiplyStr (std::string str, int times);
    void borrarPantalla ();
+   void pause ();
+   void setConfig(bool isWin = false, bool willPause = false, bool willClear = false);
 } // namespace util
 
 // En caso de trabajar con archivo de cabecero, descomentar la siguiente linea y modificar la ruta
@@ -117,7 +137,7 @@ namespace util {
          borrarPantalla();
          if (claveIngresada == clave) {
             std::cout << "Clave Ingresada Correcta. Puede Continuar.\n";
-            system("pause");
+            pause();
             return true; // Retorna verdadero, que la clave ingresada fue valida
          } else { // Si no coincidio, avisa que se equivoco
             std::cout << "Clave Ingresada Incorrecta. ";
@@ -127,7 +147,7 @@ namespace util {
          }
       }
       std::cout << "Operacion Cancelada.\n";
-      system("pause");
+      pause();
       return false;  // Retorna falso, ya que las claves ingresadas no fueron validas
    }
    // Habilita una entrada de usuario validada para que ingrese una cadena de texto validada,
@@ -168,9 +188,30 @@ namespace util {
          }
       }
    }
-   // Declara y define la funcion borrarPantalla, sin argumentos ni retorno (void)
+   // Recibe un string y lo retorna repetido la cantidad de veces indicada
+   std::string multiplyStr (std::string str, int times) {
+      std::string textoMultiplicado = "";
+      for (int i = 0; i < times; i++) {
+         textoMultiplicado += str;
+      }
+      return textoMultiplicado;
+   }
+   // Encapsula una funcion para limpiar la pantalla del programa para multiplataforma
    void borrarPantalla () {
-      system(((OS == 'w') ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
+      if (!CONF.clear()) return;
+      system(((CONF.win()) ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
       // std::cout << "\033[2J\033[1;1H"; // LIMPIA LA CONSOLA EN UNIX/LINUX
+   }
+   // Encapsula la funcion para pausar el programa para multiplataforma
+   void pause () {
+      if (!CONF.pause()) return;
+      if (CONF.win()) {system("pause"); return;}
+      std::cout << "Presione una tecla para continuar . . . ";
+      std::cin.ignore();
+      std::cin.get();
+   }
+   void setConfig (bool isWin, bool willPause, bool willClear) {
+      Config newConf(isWin, willPause, willClear);
+      CONF = newConf;
    }
 } // namespace util
