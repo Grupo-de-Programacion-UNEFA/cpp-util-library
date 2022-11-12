@@ -17,6 +17,7 @@
 #pragma once // directiva que indica que se compile una sola vez
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cmath>
 #include <cctype>
@@ -33,6 +34,7 @@ namespace util {
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
+   bool config();
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
@@ -171,7 +173,7 @@ namespace util {
          }
       }
    }
-
+   // Recibe un string y lo retorna repetido la cantidad de veces indicada
    std::string multiplyStr (std::string str, int times) {
       std::string textoMultiplicado = "";
       for (int i = 0; i < times; i++) {
@@ -179,11 +181,12 @@ namespace util {
       }
       return textoMultiplicado;
    }
-   // Declara y define la funcion borrarPantalla, sin argumentos ni retorno (void)
+   // Encapsula una funcion para limpiar la pantalla del programa para multiplataforma
    void borrarPantalla () {
       system(((OS == 'w') ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
       // std::cout << "\033[2J\033[1;1H"; // LIMPIA LA CONSOLA EN UNIX/LINUX
    }
+   // Encapsula la funcion para pausar el programa para multiplataforma
    void pause () {
       system("pause");
    }
