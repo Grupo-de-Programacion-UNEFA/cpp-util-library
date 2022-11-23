@@ -34,11 +34,7 @@ namespace util {
          bool _pause;
          bool _clear;
       public:
-         Config (bool isWin = false, bool willPause = false, bool willClear = false) {
-            _win = isWin;
-            _pause = willPause;
-            _clear = willClear;
-         }
+         Config (bool isWin = false, bool willPause = false, bool willClear = false);
          bool win () {return _win;};
          bool pause () {return _pause;};
          bool clear () {return _clear;};
@@ -68,6 +64,11 @@ namespace util {
 //  DEFINICION DE LAS FUNCIONES
 // =============================
 namespace util {
+   Config::Config (bool isWin, bool willPause, bool willClear) {
+      _win = isWin;
+      _pause = willPause;
+      _clear = willClear;
+   }
    // Habilita una entrada de usuario validada para que ingrese un numero entero o flotante,
    // imprimiendo un mensaje descriptivo que se repite tras cada iteracion.
    // Recibe un booleano que dicta ademas si el valor a devolver va a ser decimal o entero.
