@@ -23,30 +23,61 @@
 #include <cctype>
 #include <stdlib.h>
 #include <climits>
+#include <iterator>
+#include <map>
 // ==============================
 //  DECLARACION DE LAS FUNCIONES
 // ==============================
 
 namespace util {
    class Config {
-      private:
-         bool _win;
-         bool _pause;
-         bool _clear;
       public:
-         Config (bool isWin = false, bool willPause = false, bool willClear = false);
+         Config ();
          bool win () {return _win;};
          bool pause () {return _pause;};
          bool clear () {return _clear;};
+      private:
+         // Temporary values for don't break code
+         bool _win = true;
+         bool _pause = false;
+         bool _clear = false;
+         // Dictionaries of configurations
+         std::map <std::string, bool> boolList = {
+            {"isWin", false},
+            {"willPause", false},
+            {"willClear", false}
+         };
+         std::map <std::string, int> intList;
+         std::map <std::string, float> floatList;
+         std::map <std::string, double> doubleList;
+         std::map <std::string, std::string> stringList;
+
+         std::string removeComments(std::string line) {
+            std::string cleaned;
+            for (int i = 0; i < line.size(); i++) {
+               if (line[i] == '#') break;
+               cleaned += line[i];
+            } 
+            return cleaned;
+         }
+         std::string removeSpaces(std::string line) {
+            std::string sanitized = "";
+            for (int i = 0; i < line.size(); i++) {
+               if (line[i] != ' ') sanitized += line[i];
+            } 
+            return sanitized;
+         }
    };
    Config CONF;
    // Templates & Overloaded Functions
    template <typename numType> numType inputNumber (std::string textoARepetir, numType max = INT_MAX, numType min = INT_MIN);
+   template <typename numType> numType strToNumb (std::string str);
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
    bool validarClav (std::string clave, int intentos = 3);
    bool inputBool (std::string textoARepetir, std::string valorTrue, std::string valorFalse);
+   bool strToBool (std::string str, std::string trueValue, std::string falseValue);
    std::string inputString (std::string textoARepetir, bool espaciosEnBlanco = false, unsigned int longitudDeseada = 0);
    std::string multiplyStr (std::string str, int times);
    void borrarPantalla ();
@@ -64,24 +95,28 @@ namespace util {
 //  DEFINICION DE LAS FUNCIONES
 // =============================
 namespace util {
-   Config::Config (bool isWin, bool willPause, bool willClear) {
-      _win = isWin;
-      _pause = willPause;
-      _clear = willClear;
+   Config::Config () {
+      std::ifstream file ("util.conf");
+      std::string line, output;
+
+      while ( std::getline ( file, line))
+      {
+         // Sanitize each line of configuration
+         output = Config::removeSpaces(Config::removeComments( line ));
+         output += "\n";
+      }
    }
    // Habilita una entrada de usuario validada para que ingrese un numero entero o flotante,
    // imprimiendo un mensaje descriptivo que se repite tras cada iteracion.
    // Recibe un booleano que dicta ademas si el valor a devolver va a ser decimal o entero.
    template <typename numType> numType inputNumber (std::string textoARepetir, numType max, numType min) {
-      std::string input = "";
       numType num;
+      std::string input = "";
       while (true) {
          std::cout << textoARepetir;
          std::cin >> input;
-         try	{
-            // Lo convierte a float y luego al tipo especificado
-            num = stof(input);
-            // Revisa que no exceda los valores maximos y minimos especificados
+         try {
+            num = util::strToNumb<numType>(input);
             if (num < min) throw 1;
             if (num > max) throw 2;
             return num;
@@ -98,6 +133,12 @@ namespace util {
          }
          continue;
       }
+   }
+   template <typename numType> numType strToNumb (std::string str) {
+      numType num;
+      // Lo convierte a double y luego al tipo especificado
+      num = stod(str);
+      // Revisa que no exceda los valores maximos y minimos especificados
    }
    // Recibe un FLOAT
    // Retorna una cadena de texto que representa un numero flotante con dos decimales
@@ -128,6 +169,11 @@ namespace util {
          
          std::cout << "Ingrese una letra valida." << std::endl;
       }
+   }
+   bool strToBool (std::string str, std::string trueValue, std::string falseValue) {
+      if (str == trueValue) return true;
+      if (str == falseValue) return false;
+      throw 1;
    }
    // retorno booleano y cuyos parametros es la clave a validar como entero.
    // Son 3 intentos por DEFAULT
@@ -212,7 +258,7 @@ namespace util {
       std::cin.get();
    }
    void setConfig (bool isWin, bool willPause, bool willClear) {
-      Config newConf(isWin, willPause, willClear);
-      CONF = newConf;
+      //Config newConf(isWin, willPause, willClear);
+      //CONF = newConf;
    }
 } // namespace util
