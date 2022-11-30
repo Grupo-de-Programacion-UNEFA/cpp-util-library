@@ -30,6 +30,11 @@
 // ==============================
 
 namespace util {
+   struct ConfigStatement {
+      char typeOfValue[1];
+      string key;
+      string strValue;
+   };
    class Config {
       public:
          Config ();
@@ -67,6 +72,25 @@ namespace util {
             } 
             return sanitized;
          }
+         // b:key=value
+         ConfigStatement getStatement (string str) {
+            ConfigStatement statement;
+
+            tSeparator = str.find(':');
+            pSeparator = str.find('=');
+            if (tSeparator == -1 || pSeparator == -1) throw 1;
+            for (int i = 0; i < str.size; i++) {
+               if (i == tSeparator || i == pSeparator) continue;
+               if (i < tSeparator) {
+                  statement.typeOfValue[i] = str[i];
+               } else if (i < pSeparator) {
+                  statement.key = str[i];
+               } else {
+                  statement.strValue = str[i];
+               }
+            }
+            retun statement;
+         }
    };
    Config CONF;
    // Templates & Overloaded Functions
@@ -98,13 +122,36 @@ namespace util {
    Config::Config () {
       std::ifstream file ("util.conf");
       std::string line, output;
+      ConfigStatement statement;
 
-      while ( std::getline ( file, line))
-      {
+      while ( std::getline ( file, line)) {
          // Sanitize each line of configuration
          output = Config::removeSpaces(Config::removeComments( line ));
-         output += "\n";
+         if (output.size == 0) continue;
+         try {
+            statement = getStatement(output);
+            switch (statement.typeOfValue) {
+               case 'b':
+                  // Add boolean to boolList
+                  break;
+               case 'i':
+                  // Add boolean to intList
+                  break;
+               case 'f':
+                  // Add boolean to floatList
+                  break;
+               case 'd':
+                  // Add boolean to doubleList
+                  break;
+               case 's':
+                  // Add boolean to stringList
+                  break;
+               default:
+                  throw 2;
+            }
+         }
       }
+      file.close();
    }
    // Habilita una entrada de usuario validada para que ingrese un numero entero o flotante,
    // imprimiendo un mensaje descriptivo que se repite tras cada iteracion.
