@@ -7,8 +7,9 @@ int main () {
 	int entero;
 	float flotante;
 	double doble;
-	util::setConfig(false, true, true);
+	// util::setConfig(false, true, true);
 
+	cout << "Estoy en " << ((util::CONF.win()) ? "windows" : "linux") << endl;
 	cout << "Este es un mensaje" << endl;
 	util::pause();
 	util::borrarPantalla();

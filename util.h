@@ -30,28 +30,33 @@
 // ==============================
 
 namespace util {
+   const std::map <char, int> typeOfValue = {
+      {'c', 1},
+      {'b', 2},
+      {'i', 3},
+      {'f', 4},
+      {'d', 5},
+      {'s', 6}
+   };
    struct ConfigStatement {
-      char typeOfValue[1];
-      string key;
-      string strValue;
+      char typeOV[1];
+      std::string key;
+      std::string strValue;
    };
    class Config {
       public:
          Config ();
-         bool win () {return _win;};
-         bool pause () {return _pause;};
-         bool clear () {return _clear;};
+         bool win () {return boolList["isWin"];};
+         bool pause () {return boolList["willPause"];};
+         bool clear () {return boolList["willClear"];};
       private:
-         // Temporary values for don't break code
-         bool _win = true;
-         bool _pause = false;
-         bool _clear = false;
          // Dictionaries of configurations
          std::map <std::string, bool> boolList = {
             {"isWin", false},
             {"willPause", false},
             {"willClear", false}
          };
+         std::map <std::string, char> charList;
          std::map <std::string, int> intList;
          std::map <std::string, float> floatList;
          std::map <std::string, double> doubleList;
@@ -73,29 +78,29 @@ namespace util {
             return sanitized;
          }
          // b:key=value
-         ConfigStatement getStatement (string str) {
+         ConfigStatement getStatement (std::string str) {
             ConfigStatement statement;
 
-            tSeparator = str.find(':');
-            pSeparator = str.find('=');
+            int tSeparator = str.find(':');
+            int pSeparator = str.find('=');
             if (tSeparator == -1 || pSeparator == -1) throw 1;
-            for (int i = 0; i < str.size; i++) {
+            for (int i = 0; i < str.size(); i++) {
                if (i == tSeparator || i == pSeparator) continue;
                if (i < tSeparator) {
-                  statement.typeOfValue[i] = str[i];
+                  statement.typeOV[i] = str[i];
                } else if (i < pSeparator) {
-                  statement.key = str[i];
+                  statement.key += str[i];
                } else {
-                  statement.strValue = str[i];
+                  statement.strValue += str[i];
                }
             }
-            retun statement;
+            return statement;
          }
    };
    Config CONF;
    // Templates & Overloaded Functions
    template <typename numType> numType inputNumber (std::string textoARepetir, numType max = INT_MAX, numType min = INT_MIN);
-   template <typename numType> numType strToNumb (std::string str);
+   template <typename numType> numType strToNumber (std::string str);
    std::string formattedFloat (float num);
    std::string formattedFloat (std::string str);
    // Simple Functions
@@ -120,6 +125,7 @@ namespace util {
 // =============================
 namespace util {
    Config::Config () {
+      int value;
       std::ifstream file ("util.conf");
       std::string line, output;
       ConfigStatement statement;
@@ -127,28 +133,48 @@ namespace util {
       while ( std::getline ( file, line)) {
          // Sanitize each line of configuration
          output = Config::removeSpaces(Config::removeComments( line ));
-         if (output.size == 0) continue;
+         if (output.size() == 0) continue;
          try {
             statement = getStatement(output);
-            switch (statement.typeOfValue) {
-               case 'b':
+            switch (typeOfValue.find(statement.typeOV[0])->second) {
+               case 1:
+                  // Add char to charList
+                  charList[statement.key] = statement.strValue[0];
+                  break;
+               case 2:
                   // Add boolean to boolList
+                  boolList[statement.key] = strToBool(statement.strValue, "true", "false");
                   break;
-               case 'i':
-                  // Add boolean to intList
+               case 3:
+                  // Add int to intList
+                  intList[statement.key] = strToNumber<int>(statement.strValue);
                   break;
-               case 'f':
-                  // Add boolean to floatList
+               case 4:
+                  // Add float to floatList
+                  floatList[statement.key] = strToNumber<float>(statement.strValue);
                   break;
-               case 'd':
-                  // Add boolean to doubleList
+               case 5:
+                  // Add double to doubleList
+                  doubleList[statement.key] = strToNumber<double>(statement.strValue);
                   break;
-               case 's':
-                  // Add boolean to stringList
+               case 6:
+                  // Add string to stringList
+                  stringList[statement.key] = statement.strValue;
                   break;
                default:
                   throw 2;
             }
+         }
+         catch(int err) {
+            std::string msg = "ERROR: ";
+            if (err == 1) msg += "getStatement process failed.\n";
+            if (err == 2) msg += "Unknown type of value in configuration.\n";
+            if (err == 3) msg += "Invalid conversion.\n";
+            std::cout << msg;
+         }
+         catch(...) {
+            std::cout << "hubo un error";
+            pause();
          }
       }
       file.close();
@@ -163,7 +189,7 @@ namespace util {
          std::cout << textoARepetir;
          std::cin >> input;
          try {
-            num = util::strToNumb<numType>(input);
+            num = util::strToNumber<numType>(input);
             if (num < min) throw 1;
             if (num > max) throw 2;
             return num;
@@ -181,11 +207,8 @@ namespace util {
          continue;
       }
    }
-   template <typename numType> numType strToNumb (std::string str) {
-      numType num;
-      // Lo convierte a double y luego al tipo especificado
-      num = stod(str);
-      // Revisa que no exceda los valores maximos y minimos especificados
+   template <typename numType> numType strToNumber (std::string str) {
+      return stod(str);
    }
    // Recibe un FLOAT
    // Retorna una cadena de texto que representa un numero flotante con dos decimales
@@ -220,7 +243,7 @@ namespace util {
    bool strToBool (std::string str, std::string trueValue, std::string falseValue) {
       if (str == trueValue) return true;
       if (str == falseValue) return false;
-      throw 1;
+      throw 3;
    }
    // retorno booleano y cuyos parametros es la clave a validar como entero.
    // Son 3 intentos por DEFAULT
