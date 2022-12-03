@@ -41,7 +41,7 @@ namespace util {
       {'s', 6}
    };
    struct ConfigStatement {
-      char typeOV[1];
+      char typeOV[2];
       std::string key;
       std::string strValue;
    };
@@ -58,6 +58,8 @@ namespace util {
          std::map <std::string, float> _floatList;
          std::map <std::string, double> _doubleList;
          std::map <std::string, std::string> _stringList;
+
+         std::map <std::string, bool> _readonlyList;
 
          std::string removeComments(std::string line) {
             std::string cleaned;
@@ -103,12 +105,12 @@ namespace util {
          double readDouble(std::string key);
          std::string readString(std::string key);
 
-         void writeChar(std::string key, char value);
-         void writeBool(std::string key, bool value);
-         void writeInt(std::string key, int value);
-         void writeFloat(std::string key, float value);
-         void writeDouble(std::string key, double value);
-         void writeString(std::string key, std::string value);
+         void writeChar(std::string key, char value, bool readonly = false);
+         void writeBool(std::string key, bool value, bool readonly = false);
+         void writeInt(std::string key, int value, bool readonly = false);
+         void writeFloat(std::string key, float value, bool readonly = false);
+         void writeDouble(std::string key, double value, bool readonly = false);
+         void writeString(std::string key, std::string value, bool readonly = false);
    };
    Config CONF;
    // Templates & Overloaded Functions
@@ -138,6 +140,7 @@ namespace util {
 // =============================
 namespace util {
    Config::Config () {
+      bool isReadonly;
       int value;
       std::ifstream file ("util.conf");
       std::string line, output;
@@ -149,30 +152,31 @@ namespace util {
          if (output.size() == 0) continue;
          try {
             statement = getStatement(output);
-            switch (typeOfValue.find(statement.typeOV[0])->second) {
+            isReadonly = strToBool(std::string(1, statement.typeOV[0]), "r", "w");
+            switch (typeOfValue.find(statement.typeOV[1])->second) {
                case 1:
                   // Add boolean to boolList
-                  writeBool(statement.key, strToBool(statement.strValue, "true", "false"));
+                  writeBool(statement.key, strToBool(statement.strValue, "true", "false"), isReadonly);
                   break;
                case 2:
                   // Add char to charList
-                  writeChar(statement.key, statement.strValue[0]);
+                  writeChar(statement.key, statement.strValue[0], isReadonly);
                   break;
                case 3:
                   // Add int to intList
-                  writeInt(statement.key, strToNumber<int>(statement.strValue));
+                  writeInt(statement.key, strToNumber<int>(statement.strValue), isReadonly);
                   break;
                case 4:
                   // Add float to floatList
-                  writeFloat(statement.key, strToNumber<float>(statement.strValue));
+                  writeFloat(statement.key, strToNumber<float>(statement.strValue), isReadonly);
                   break;
                case 5:
                   // Add double to doubleList
-                  writeDouble(statement.key, strToNumber<double>(statement.strValue));
+                  writeDouble(statement.key, strToNumber<double>(statement.strValue), isReadonly);
                   break;
                case 6:
                   // Add string to stringList
-                  writeString(statement.key, statement.strValue);
+                  writeString(statement.key, statement.strValue, isReadonly);
                   break;
                default:
                   throw 2;
@@ -255,56 +259,68 @@ namespace util {
       }
    }
    
-   void Config::writeBool(std::string key, bool value) {
+   void Config::writeBool(std::string key, bool value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _boolList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }
    }
-   void Config::writeChar(std::string key, char value) {
+   void Config::writeChar(std::string key, char value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _charList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }
    }
-   void Config::writeInt(std::string key, int value) {
+   void Config::writeInt(std::string key, int value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _intList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }
    }
-   void Config::writeFloat(std::string key, float value) {
+   void Config::writeFloat(std::string key, float value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _floatList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }
    }
-   void Config::writeDouble(std::string key, double value) {
+   void Config::writeDouble(std::string key, double value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _doubleList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }
    }
-   void Config::writeString(std::string key, std::string value) {
+   void Config::writeString(std::string key, std::string value, bool readonly) {
       try {
+         if (_readonlyList.find(key) != _readonlyList.end() && _readonlyList[key]) throw -1;
+         _readonlyList[key] = readonly;
          _stringList[key] = value;
       } catch (int err) {
-         std::cout << "ERROR: configuration not found. Abort\n";
+         std::cout << "ERROR: Write a read-only configuration is forbidden. Abort\n";
          util::pause();
          exit(EXIT_FAILURE);
       }

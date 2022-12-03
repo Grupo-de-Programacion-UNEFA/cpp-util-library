@@ -24,7 +24,7 @@ int main () {
 
 	util::CONF.writeBool("willClear", false);
 	util::CONF.writeInt("edadLegal", 20);
-	util::CONF.writeFloat("PI", 3);
+	// util::CONF.writeFloat("PI", 3);
 	util::CONF.writeDouble("doble", 2*util::CONF.readFloat("PI"));
 	util::CONF.writeString("nombre", "Yolvan G.");
 
