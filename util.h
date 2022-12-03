@@ -25,7 +25,6 @@
 #include <climits>
 #include <iterator>
 #include <map>
-#include <type_traits>
 
 // ==============================
 //  DECLARACION DE LAS FUNCIONES
