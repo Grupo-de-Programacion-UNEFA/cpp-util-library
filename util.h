@@ -25,14 +25,16 @@
 #include <climits>
 #include <iterator>
 #include <map>
+#include <type_traits>
+
 // ==============================
 //  DECLARACION DE LAS FUNCIONES
 // ==============================
 
 namespace util {
    const std::map <char, int> typeOfValue = {
-      {'c', 1},
-      {'b', 2},
+      {'b', 1},
+      {'c', 2},
       {'i', 3},
       {'f', 4},
       {'d', 5},
@@ -44,23 +46,18 @@ namespace util {
       std::string strValue;
    };
    class Config {
-      public:
-         Config ();
-         bool win () {return boolList["isWin"];};
-         bool pause () {return boolList["willPause"];};
-         bool clear () {return boolList["willClear"];};
       private:
          // Dictionaries of configurations
-         std::map <std::string, bool> boolList = {
+         std::map <std::string, bool> _boolList = {
             {"isWin", false},
             {"willPause", false},
             {"willClear", false}
          };
-         std::map <std::string, char> charList;
-         std::map <std::string, int> intList;
-         std::map <std::string, float> floatList;
-         std::map <std::string, double> doubleList;
-         std::map <std::string, std::string> stringList;
+         std::map <std::string, char> _charList;
+         std::map <std::string, int> _intList;
+         std::map <std::string, float> _floatList;
+         std::map <std::string, double> _doubleList;
+         std::map <std::string, std::string> _stringList;
 
          std::string removeComments(std::string line) {
             std::string cleaned;
@@ -96,6 +93,22 @@ namespace util {
             }
             return statement;
          }
+      public:
+         Config ();
+
+         char readChar(std::string key);
+         bool readBool(std::string key);
+         int readInt(std::string key);
+         float readFloat(std::string key);
+         double readDouble(std::string key);
+         std::string readString(std::string key);
+
+         void writeChar(std::string key, char value);
+         void writeBool(std::string key, bool value);
+         void writeInt(std::string key, int value);
+         void writeFloat(std::string key, float value);
+         void writeDouble(std::string key, double value);
+         void writeString(std::string key, std::string value);
    };
    Config CONF;
    // Templates & Overloaded Functions
@@ -138,28 +151,28 @@ namespace util {
             statement = getStatement(output);
             switch (typeOfValue.find(statement.typeOV[0])->second) {
                case 1:
-                  // Add char to charList
-                  charList[statement.key] = statement.strValue[0];
+                  // Add boolean to boolList
+                  writeBool(statement.key, strToBool(statement.strValue, "true", "false"));
                   break;
                case 2:
-                  // Add boolean to boolList
-                  boolList[statement.key] = strToBool(statement.strValue, "true", "false");
+                  // Add char to charList
+                  writeChar(statement.key, statement.strValue[0]);
                   break;
                case 3:
                   // Add int to intList
-                  intList[statement.key] = strToNumber<int>(statement.strValue);
+                  writeInt(statement.key, strToNumber<int>(statement.strValue));
                   break;
                case 4:
                   // Add float to floatList
-                  floatList[statement.key] = strToNumber<float>(statement.strValue);
+                  writeFloat(statement.key, strToNumber<float>(statement.strValue));
                   break;
                case 5:
                   // Add double to doubleList
-                  doubleList[statement.key] = strToNumber<double>(statement.strValue);
+                  writeDouble(statement.key, strToNumber<double>(statement.strValue));
                   break;
                case 6:
                   // Add string to stringList
-                  stringList[statement.key] = statement.strValue;
+                  writeString(statement.key, statement.strValue);
                   break;
                default:
                   throw 2;
@@ -170,6 +183,7 @@ namespace util {
             if (err == 1) msg += "getStatement process failed.\n";
             if (err == 2) msg += "Unknown type of value in configuration.\n";
             if (err == 3) msg += "Invalid conversion.\n";
+            if (err == -1) msg += "ERROR. Read-only configuration already exists.\n";
             std::cout << msg;
          }
          catch(...) {
@@ -178,6 +192,122 @@ namespace util {
          }
       }
       file.close();
+   }
+
+   bool Config::readBool(std::string key) {
+      try {
+         if (_boolList.find(key) == _boolList.end()) throw -1;
+         return _boolList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   char Config::readChar(std::string key) {
+      try {
+         if (_charList.find(key) == _charList.end()) throw -1;
+         return _charList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   int Config::readInt(std::string key) {
+      try {
+         if (_intList.find(key) == _intList.end()) throw -1;
+         return _intList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   float Config::readFloat(std::string key) {
+      try {
+         if (_floatList.find(key) == _floatList.end()) throw -1;
+         return _floatList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   double Config::readDouble(std::string key) {
+      try {
+         if (_doubleList.find(key) == _doubleList.end()) throw -1;
+         return _doubleList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   std::string Config::readString(std::string key) {
+      try {
+         if (_stringList.find(key) == _stringList.end()) throw -1;
+         return _stringList[key];
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   
+   void Config::writeBool(std::string key, bool value) {
+      try {
+         _boolList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   void Config::writeChar(std::string key, char value) {
+      try {
+         _charList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   void Config::writeInt(std::string key, int value) {
+      try {
+         _intList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   void Config::writeFloat(std::string key, float value) {
+      try {
+         _floatList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   void Config::writeDouble(std::string key, double value) {
+      try {
+         _doubleList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
+   }
+   void Config::writeString(std::string key, std::string value) {
+      try {
+         _stringList[key] = value;
+      } catch (int err) {
+         std::cout << "ERROR: configuration not found. Abort\n";
+         util::pause();
+         exit(EXIT_FAILURE);
+      }
    }
    // Habilita una entrada de usuario validada para que ingrese un numero entero o flotante,
    // imprimiendo un mensaje descriptivo que se repite tras cada iteracion.
@@ -315,20 +445,21 @@ namespace util {
    }
    // Encapsula una funcion para limpiar la pantalla del programa para multiplataforma
    void borrarPantalla () {
-      if (!CONF.clear()) return;
-      system(((CONF.win()) ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
+      if (!CONF.readBool("willClear")) return;
+      system(((CONF.readBool("isWin")) ? "cls" : "clear")); // LIMPIA LA CONSOLA EN WINDOWS/LINUX
       // std::cout << "\033[2J\033[1;1H"; // LIMPIA LA CONSOLA EN UNIX/LINUX
    }
    // Encapsula la funcion para pausar el programa para multiplataforma
    void pause () {
-      if (!CONF.pause()) return;
-      if (CONF.win()) {system("pause"); return;}
+      if (!CONF.readBool("willPause")) return;
+      if (CONF.readBool("isWin")) {system("pause"); return;}
       std::cout << "Presione una tecla para continuar . . . ";
       std::cin.ignore();
       std::cin.get();
    }
    void setConfig (bool isWin, bool willPause, bool willClear) {
-      //Config newConf(isWin, willPause, willClear);
-      //CONF = newConf;
+      CONF.writeBool("isWin", isWin);
+      CONF.writeBool("willPause", willPause);
+      CONF.writeBool("willClear", willClear);
    }
 } // namespace util
